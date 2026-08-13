@@ -40,7 +40,7 @@ class Admin::PostsController < Admin::ApplicationController
     if @post.archive
       redirect_to admin_posts_path, notice: "Post was successfully archived."
     else
-      flash[:alter] = "Post could not be archived due to #{@post.errors.full_messages.to_sentence}."
+      flash[:alert] = "Post could not be archived due to #{@post.errors.full_messages.to_sentence}."
       redirect_back fallback_location: admin_posts_path
     end
   end
@@ -49,7 +49,7 @@ class Admin::PostsController < Admin::ApplicationController
     if @post.destroy
       redirect_to admin_posts_path, notice: "Post was successfully deleted."
     else
-      flash[:alter] = "Post could not be deleted due to #{@post.errors.full_messages.to_sentence}."
+      flash[:alert] = "Post could not be deleted due to #{@post.errors.full_messages.to_sentence}."
       redirect_back fallback_location: admin_posts_path
     end
   end
