@@ -27,27 +27,64 @@ RSpec.describe DatabaseEvent, time_travel_to: "2026-10-13 12:00", type: :model d
   let(:next_month)     { Time.zone.local(2026, 11, 13, 18, 0) }
   let(:two_months)     { Time.zone.local(2026, 12, 13, 18, 0) }
 
-  describe '.today_or_in_the_future' do
-    it "returns today and future events" do
-      last_month_event = create(:database_event, :meetup, :melbourne, start_datetime: last_month)
-      today_event      = create(:database_event, :meetup, :melbourne, start_datetime: today)
-      next_month_event = create(:database_event, :meetup, :melbourne, start_datetime: next_month)
+  describe 'scopes' do
+    describe '.by_region' do
+      it 'filters events by region' do
+        melbourne_event = create(:database_event, :meetup, :melbourne)
+        sydney_event    = create(:database_event, :conference, :sydney)
 
-      expect(described_class.today_or_in_the_future).to include(next_month_event, today_event)
-      expect(described_class.today_or_in_the_future).not_to include(last_month_event)
-    end
-  end
-
-  describe ".all_by_date" do
-    before do
-      create(:database_event, :meetup, :melbourne, start_datetime: next_month)
-      create(:database_event, :meetup, :melbourne, start_datetime: today)
+        results = described_class.by_region(:melbourne)
+        expect(results).to include(melbourne_event)
+        expect(results).not_to include(sydney_event)
+      end
     end
 
-    it "returns all events, sorted by date descending" do
-      events = described_class.all_by_date
-      expect(events.count).to eq(2)
-      expect(events.map(&:start_datetime)).to eq([next_month, today])
+    describe ".by_date" do
+      before do
+        create(:database_event, :meetup, :melbourne, start_datetime: next_month)
+        create(:database_event, :meetup, :melbourne, start_datetime: today)
+      end
+
+      it "returns all events, sorted by date descending" do
+        events = described_class.by_date
+        expect(events.count).to eq(2)
+        expect(events.map(&:start_datetime)).to eq([next_month, today])
+      end
+    end
+
+    describe '.today_or_in_the_future' do
+      it "returns today and future events" do
+        last_month_event = create(:database_event, :meetup, :melbourne, start_datetime: last_month)
+        today_event      = create(:database_event, :meetup, :melbourne, start_datetime: today)
+        next_month_event = create(:database_event, :meetup, :melbourne, start_datetime: next_month)
+
+        expect(described_class.today_or_in_the_future).to include(next_month_event, today_event)
+        expect(described_class.today_or_in_the_future).not_to include(last_month_event)
+      end
+    end
+
+    describe '.before_today' do
+      it "returns events before today" do
+        last_month_event = create(:database_event, :meetup, :melbourne, start_datetime: 1.month.ago)
+        today_event      = create(:database_event, :meetup, :melbourne, start_datetime: Date.current)
+        next_month_event = create(:database_event, :meetup, :melbourne, start_datetime: 1.month.from_now)
+
+        expect(described_class.before_today).to include(last_month_event)
+        expect(described_class.before_today).not_to include(today_event)
+        expect(described_class.before_today).not_to include(next_month_event)
+      end
+    end
+
+    describe '.national' do
+      it 'finds only national conferences and ruby retreats' do
+        meetup_event     = create(:database_event, :meetup, :melbourne)
+        retreat_event    = create(:database_event, :ruby_retreat, :melbourne)
+        conference_event = create(:database_event, :conference, :sydney)
+
+        results = described_class.national
+        expect(results).to include(conference_event, retreat_event)
+        expect(results).not_to include(meetup_event)
+      end
     end
   end
 
@@ -175,7 +212,7 @@ RSpec.describe DatabaseEvent, time_travel_to: "2026-10-13 12:00", type: :model d
       expect(first_event.talks.first.speakers.first).to be_a(Melbourne::Event::Speaker)
 
       database_event_with_talks
-      events = described_class.all_by_date
+      events = described_class.by_date
       expect(events).to be_an(ActiveRecord::Relation)
 
       first_event = events.first

@@ -16,7 +16,7 @@ module Melbourne
     before_action :confirm_is_meetup_admin!, only: %i[new create edit update destroy]
 
     def index
-      @database_events = DatabaseEvent.all_by_date
+      @database_events = DatabaseEvent.by_date.by_region_and_national(:melbourne)
     end
 
     def new
