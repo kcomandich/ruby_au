@@ -162,7 +162,7 @@ RSpec.describe Post, type: :model do
         expect(results).not_to include(announcement_post)
       end
 
-      it 'returns nil when category is not provided' do
+      it 'returns everything when category is not provided' do
         expect(described_class.filter_by_category(nil)).to contain_exactly(news_post, announcement_post)
       end
     end
