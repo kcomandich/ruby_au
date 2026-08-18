@@ -45,14 +45,14 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
       <div class="space-y-1 sm:space-y-2">
         <%= form.label :region, class: "block text-sm sm:text-base font-medium text-gray-700" %>
-        <%= form.select :region, ["adelaide", "brisbane", "melbourne", "perth", "sydney"] %>
+        <%= form.select :region, DatabaseEvent::REGIONS %>
       </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
       <div class="space-y-1 sm:space-y-2">
         <%= form.label :event_type, class: "block text-sm sm:text-base font-medium text-gray-700" %>
-        <%= form.select :event_type, ["agm", "conference", "meetup", "rails_girls", "ruby_retreat"] %>
+        <%= form.select :event_type, DatabaseEvent::EVENT_TYPES %>
       </div>
     </div>
 

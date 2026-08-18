@@ -168,6 +168,47 @@ RSpec.describe DatabaseEvent, type: :model do
     end
   end
 
+  describe 'scopes' do
+    describe '.filter_by_region' do
+      let(:melbourne_event) { FactoryBot.create(:database_event, :meetup, :melbourne) }
+      let(:sydney_event) { FactoryBot.create(:database_event, :conference, :sydney) }
+
+      before do
+        melbourne_event
+        sydney_event
+      end
+
+      it 'filters events by region when region is provided' do
+        results = described_class.filter_by_region(:melbourne)
+        expect(results).to include(melbourne_event)
+        expect(results).not_to include(sydney_event)
+      end
+
+      it 'returns everything when region is not provided' do
+        expect(described_class.filter_by_region(nil)).to contain_exactly(melbourne_event, sydney_event)
+      end
+    end
+
+    describe '.national' do
+      let(:meetup_event) { FactoryBot.create(:database_event, :meetup, :melbourne) }
+      let(:retreat_event) { FactoryBot.create(:database_event, :ruby_retreat, :melbourne) }
+      let(:conference_event) { FactoryBot.create(:database_event, :conference, :sydney) }
+
+      before do
+        meetup_event
+        retreat_event
+        conference_event
+      end
+
+      it 'finds only national conferences and ruby retreats' do
+        skip "wip"
+        results = described_class.national
+        expect(results).to include(conference_event, retreat_event)
+        expect(results).not_to include(meetup_event)
+      end
+    end
+  end
+
   describe "DatabaseEvent" do
     it "differs from site Melbourne::Event" do
       events = Melbourne::Event.all
