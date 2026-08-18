@@ -43,6 +43,10 @@ FactoryBot.define do
       event_type { :conference }
     end
 
+    trait :ruby_retreat do
+      event_type { :ruby_retreat }
+    end
+
     trait :melbourne do
       region { :melbourne }
     end

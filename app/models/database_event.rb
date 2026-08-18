@@ -20,7 +20,15 @@
 #
 #  index_events_on_venue_id  (venue_id)
 #
+
 class DatabaseEvent < ApplicationRecord
+  EVENT_TYPES = %i[
+    agm conference meetup rails_girls ruby_retreat
+  ].freeze
+  REGIONS = %i[
+    adelaide brisbane melbourne perth sydney
+  ].freeze
+
   self.table_name = "events"
 
   extend FriendlyId
@@ -29,9 +37,12 @@ class DatabaseEvent < ApplicationRecord
   has_many   :talks, dependent: :destroy, inverse_of: :event
   belongs_to :venue
 
-  scope :all_by_date, -> { order(date: :desc) }
+  scope :by_region, ->(region) { where(region: region) }
+  scope :by_date, -> { order(date: :desc) }
   scope :today_or_in_the_future, -> { order(date: :asc).where('date >= ?', Time.zone.today) }
-  scope :before_today, -> { all_by_date.where('date < ?', Time.zone.today) }
+  scope :before_today, -> { by_date.where('date < ?', Time.zone.today) }
+  scope :national, -> { where(event_type: %i[conference ruby_retreat]) }
+  scope :by_region_and_national, ->(region) { by_region(region).or(national) }
 
   validates :date, presence: true
   validates :description, presence: true
