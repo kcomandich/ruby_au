@@ -10,13 +10,24 @@ RSpec.describe Melbourne::DatabaseEventsController, type: :request do
   describe 'GET /database_events' do
     let!(:past_event) { FactoryBot.create(:database_event, :meetup, :melbourne, date: 1.month.ago) }
     let!(:current_event) { FactoryBot.create(:database_event, :meetup, :melbourne, date: 1.day.from_now) }
+    let!(:sydney_event) { FactoryBot.create(:database_event, :meetup, :sydney, date: 1.month.from_now) }
+    let!(:national_event) { FactoryBot.create(:database_event, :conference, :sydney, date: 3.months.from_now) }
 
     it 'displays events in correct order' do
       get melbourne_database_events_path
       expect(response).to have_http_status(:ok)
 
       database_events = assigns(:database_events)
-      expect(database_events.to_a).to eq([current_event, past_event])
+      expect(database_events).to eq([national_event, current_event, past_event])
+    end
+
+    it 'only shows melbourne or national events' do
+      get melbourne_database_events_path
+
+      database_events = assigns(:database_events)
+      expect(database_events).to include(current_event)
+      expect(database_events).to include(national_event)
+      expect(database_events).not_to include(sydney_event)
     end
 
     context 'when authenticated' do
