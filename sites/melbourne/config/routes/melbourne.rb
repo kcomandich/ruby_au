@@ -13,6 +13,10 @@ Rails.application.routes.draw do
 
       resources :database_events, param: :slug
 
+      resources :upcoming_database_events, only: %i[index]
+
+      resources :past_database_events, only: %i[index]
+
       get "/talks", to: redirect(
         "https://github.com/rubyaustralia/melbourne-ruby/issues", status: 302
       )
